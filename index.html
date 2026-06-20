@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake 404 - Server Glitch Edition</title>
+    <!-- Google Fonts: Outfit for modern UI, Share Tech Mono/Fira Code for terminal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <meta name="description" content="A glitched snake game themed around HTTP status codes, web development, and terminal retro-futuristic visuals." />
+  </head>
+  <body>
+    <!-- Main Retro Web Browser Wrapper -->
+    <div id="browser-container">
+      
+      <!-- Browser Top Window Bar -->
+      <div class="browser-header">
+        <div class="window-controls">
+          <span class="control-dot close"></span>
+          <span class="control-dot minimize"></span>
+          <span class="control-dot maximize"></span>
+        </div>
+        <div class="browser-tabs">
+          <div class="tab active" id="tab-game">
+            <span class="tab-icon">🌐</span>
+            <span class="tab-title">snake_404_v1.0.js</span>
+          </div>
+          <div class="tab" id="tab-about">
+            <span class="tab-icon">❓</span>
+            <span class="tab-title">HTTP_Status_Codes.md</span>
+          </div>
+        </div>
+        <div class="window-title">Server Console: Active connection</div>
+      </div>
+
+      <!-- Browser Navigation & Address Bar -->
+      <div class="browser-nav-bar">
+        <div class="nav-buttons">
+          <button id="nav-back-btn" class="nav-btn" title="Back">&larr;</button>
+          <button id="nav-forward-btn" class="nav-btn" title="Forward">&rarr;</button>
+          <button id="nav-refresh-btn" class="nav-btn" title="Restart Game">&#x21bb;</button>
+        </div>
+        <div class="address-bar-wrapper">
+          <span class="address-security-lock">🔒</span>
+          <input type="text" id="browser-address-input" value="https://snake404.local/index.html" readonly />
+        </div>
+        <div class="network-latency-display">
+          <span class="ping-indicator"></span>
+          <span id="ping-text">PING: 24ms</span>
+        </div>
+      </div>
+
+      <!-- Main Browser Window Workspace -->
+      <div class="browser-workspace">
+        
+        <!-- Left Side: Game Screen (The CRT Terminal) -->
+        <div class="game-column">
+          <div class="crt-monitor-case">
+            <div class="crt-screen-screen" id="screen-glitch-wrapper">
+              
+              <!-- CRT Scanlines and curvature overlays -->
+              <div class="crt-overlay scanlines"></div>
+              <div class="crt-overlay flicker"></div>
+              <div class="crt-overlay vignette"></div>
+              
+              <!-- Actual Canvas for game loop rendering -->
+              <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+              <!-- Interactive overlays rendered over canvas for menus -->
+              
+              <!-- 1. Start / Welcome Menu Overlay -->
+              <div id="overlay-start" class="game-overlay">
+                <div class="glitch-header" data-text="SNAKE 404">SNAKE 404</div>
+                <p class="overlay-subtitle">HTTP STATUS CODE SURVIVAL SIMULATOR</p>
+                <div class="start-instructions">
+                  <div class="instruction-line"><kbd>&uarr;&darr;&larr;&rarr;</kbd> or <kbd>WASD</kbd> to steer data stream</div>
+                  <div class="instruction-line">Eat <span class="status-badge s200">200 OK</span> to compile code and grow</div>
+                  <div class="instruction-line">Avoid <span class="status-badge s403">403 FORBIDDEN</span> firewall nodes</div>
+                  <div class="instruction-line">Brace for <span class="status-badge s404">404 NOT FOUND</span> coordinate shifts</div>
+                </div>
+                <button id="start-game-btn" class="retro-btn">INITIALIZE SYSTEM</button>
+              </div>
+
+              <!-- 2. Game Over Overlay -->
+              <div id="overlay-gameover" class="game-overlay hidden">
+                <div class="glitch-header danger" data-text="CONNECTION RESET">CONNECTION RESET</div>
+                <div class="error-code-output">
+                  <p class="err-title">CRITICAL ERROR: STREAM_COLLISION</p>
+                  <p class="err-details">Buffer overflow detected at segment head. Connection dropped.</p>
+                </div>
+                <div class="score-summary-grid">
+                  <div class="score-card">
+                    <span class="label">PACKETS COMPILED:</span>
+                    <span class="value" id="final-score">0</span>
+                  </div>
+                  <div class="score-card">
+                    <span class="label">STREAM SIZE:</span>
+                    <span class="value" id="final-length">0</span>
+                  </div>
+                </div>
+                <button id="restart-game-btn" class="retro-btn restart">RECONNECT / RECOMPILE</button>
+              </div>
+
+              <!-- 3. BSOD Overlay (500 Error Screen) -->
+              <div id="overlay-bsod" class="game-overlay hidden bsod-screen">
+                <div class="bsod-title">:( SYSTEM_ERROR_500</div>
+                <p class="bsod-p">A fatal server anomaly occurred. Game state corrupted. Executing recovery procedures.</p>
+                <p class="bsod-p">Please hold while segments are defragmented and packet streams are rescaled...</p>
+                <div class="bsod-progress">
+                  <div class="bsod-bar" id="bsod-progress-bar"></div>
+                </div>
+              </div>
+
+            </div>
+            
+            <!-- Monitor Bottom Plastic Rim (Controls & Branding) -->
+            <div class="crt-bezel-bottom">
+              <span class="brand-name">NEON-RETRO 404</span>
+              <div class="bezel-leds">
+                <div class="led power-led active" id="power-led" title="Power Status"></div>
+                <div class="led drive-led" id="drive-led" title="Disk Activity"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Developer Console / Panel -->
+        <div class="devtools-sidebar">
+          
+          <div class="devtools-header">
+            <button class="dev-tab-btn active" data-target="dev-console">Console</button>
+            <button class="dev-tab-btn" data-target="dev-network">Network</button>
+            <button class="dev-tab-btn" data-target="dev-performance">Performance</button>
+          </div>
+
+          <div class="devtools-content">
+            
+            <!-- Console Panel -->
+            <div class="dev-panel active" id="dev-console">
+              <div class="console-log-header">
+                <span>Filter: All Logs</span>
+                <button id="clear-console-btn" class="console-clear">Clear</button>
+              </div>
+              <div class="console-logs-list" id="console-logs-list">
+                <!-- Javascript will append logs here dynamically -->
+              </div>
+              <div class="console-input-line">
+                <span class="prompt">&gt;</span>
+                <input type="text" id="console-cmd-input" placeholder="Execute console command..." />
+              </div>
+            </div>
+
+            <!-- Network Panel -->
+            <div class="dev-panel" id="dev-network">
+              <table class="network-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Latency</th>
+                  </tr>
+                </thead>
+                <tbody id="network-requests-list">
+                  <!-- Javascript will append requests here dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Performance Panel -->
+            <div class="dev-panel" id="dev-performance">
+              <div class="perf-stat-group">
+                <div class="perf-stat-label">FPS (Frame Rate)</div>
+                <div class="perf-stat-value"><span id="perf-fps">60.0</span> <span class="unit">Hz</span></div>
+                <div class="perf-stat-bar-container"><div class="perf-stat-bar" id="perf-fps-bar" style="width: 100%;"></div></div>
+              </div>
+              <div class="perf-stat-group">
+                <div class="perf-stat-label">Connection Bandwidth</div>
+                <div class="perf-stat-value"><span id="perf-speed">150</span> <span class="unit">ms/tick</span></div>
+              </div>
+              <div class="perf-stat-group">
+                <div class="perf-stat-label">Compile Efficiency</div>
+                <div class="perf-stat-value"><span id="perf-multiplier">1.0x</span> <span class="unit">mult</span></div>
+              </div>
+              <div class="perf-stat-group">
+                <div class="perf-stat-label">Active Packets</div>
+                <div class="perf-stat-value"><span id="perf-packets">0</span> <span class="unit">nodes</span></div>
+              </div>
+              <div class="perf-stat-group">
+                <div class="perf-stat-label">Memory Allocation (Simulated)</div>
+                <div class="perf-stat-value"><span id="perf-memory">4.02</span> <span class="unit">MB</span></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="devtools-status-bar">
+            <span>🔴 1 error</span>
+            <span>⚠️ 0 warnings</span>
+            <span class="right-align">UTF-8</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- About Modal Dialog (Help/Markdown simulator) -->
+    <div id="about-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>HTTP Status Codes - Cheat Sheet</h3>
+          <button id="close-about-btn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <h4>📥 Network Packets Legend</h4>
+          <p>Guide to incoming data packets on the network stream:</p>
+          <ul>
+            <li><strong>🟢 200 OK (Standard):</strong> The core code packet. Increases your score by 10 points, expands your file buffer (length), and feeds the stream.</li>
+            <li><strong>⚡ 404 Not Found (Anomaly):</strong> The glitched file. Multiplies your current score, but triggers visual noise, screen distortion, and inverts controls for 5 seconds. High risk, high reward!</li>
+            <li><strong>🌀 301 Redirect (Wormhole):</strong> A redirection packet. Instantly moves the snake's head to a random portal elsewhere in the grid. Keeps length unchanged.</li>
+            <li><strong>🚫 403 Forbidden (Firewall):</strong> Blocked node. Spawns wall blocks dynamically. Crashing into one triggers an immediate termination (Game Over).</li>
+            <li><strong>🔵 500 Server Error (Crash):</strong> Fatal server anomaly. Triggers a full system crash overlay (Blue Screen of Death) for 2 seconds. The server automatically recovers, shrinking the snake's length by 3 segments and resetting current speed modifiers.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main JS Bundle injection -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

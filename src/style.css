@@ -1,0 +1,985 @@
+/* ==========================================================================
+   Snake 404 - Modern Retro-Futuristic Web Game Stylesheet
+   ========================================================================== */
+
+:root {
+  --bg-darker: #05070a;
+  --bg-dark: #0d1117;
+  --bg-panel: #161b22;
+  --bg-active: #21262d;
+  
+  --border-color: #30363d;
+  --border-glow: rgba(0, 240, 255, 0.15);
+  
+  --text-main: #e6edf3;
+  --text-muted: #8b949e;
+  
+  /* HTTP Status Code Themes */
+  --color-200: #2ea043; /* Green */
+  --color-404: #ff0055; /* Glitch Magenta */
+  --color-301: #00f0ff; /* Cyan Redirect */
+  --color-403: #ff3333; /* Red Forbidden */
+  --color-500: #3377ff; /* Blue BSOD */
+  --color-yellow: #ffc000;
+  
+  --font-ui: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-code: 'Fira Code', 'Share Tech Mono', monospace;
+  
+  --glow-radius: 6px;
+}
+
+/* Reset and Global Setup */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-darker);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255, 0, 85, 0.04) 0%, transparent 40%);
+}
+
+kbd {
+  background: var(--bg-active);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  color: #fff;
+}
+
+/* ==========================================================================
+   Browser UI Shell Container
+   ========================================================================== */
+#browser-container {
+  width: 95vw;
+  height: 90vh;
+  max-width: 1200px;
+  max-height: 800px;
+  background: rgba(22, 27, 34, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+              0 0 40px rgba(0, 240, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  animation: browser-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes browser-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Browser Window Header & Tabs */
+.browser-header {
+  height: 44px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  position: relative;
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  margin-right: 24px;
+}
+
+.control-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.control-dot.close { background: #ff5f56; }
+.control-dot.minimize { background: #ffbd2e; }
+.control-dot.maximize { background: #27c93f; }
+
+.browser-tabs {
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.tab {
+  height: 34px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-main);
+}
+
+.tab.active {
+  background: var(--bg-panel);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.window-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-code);
+  pointer-events: none;
+}
+
+/* Navigation & Address Bar */
+.browser-nav-bar {
+  height: 48px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: var(--bg-active);
+  color: var(--text-main);
+}
+
+.address-bar-wrapper {
+  flex-grow: 1;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s;
+}
+
+.address-bar-wrapper:focus-within {
+  border-color: var(--color-301);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+}
+
+.address-security-lock {
+  font-size: 12px;
+  color: var(--color-200);
+}
+
+#browser-address-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-family: var(--font-code);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+}
+
+.network-latency-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: var(--font-code);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ping-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-200);
+  box-shadow: 0 0 6px var(--color-200);
+  display: inline-block;
+  animation: ping-pulse 2s infinite;
+}
+
+@keyframes ping-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   Main Workspace Layout
+   ========================================================================== */
+.browser-workspace {
+  flex-grow: 1;
+  display: flex;
+  height: calc(100% - 92px);
+  overflow: hidden;
+}
+
+/* Left side: CRT Game Box */
+.game-column {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #090c10;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.crt-monitor-case {
+  width: 100%;
+  max-width: 660px;
+  background: #1c2128;
+  border: 12px solid #2d333b;
+  border-radius: 20px;
+  box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.8),
+              0 10px 30px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+}
+
+.crt-screen-screen {
+  background: #000;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 6px;
+  border: 2px solid #161b22;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* CRT Screen Glow and Curvature Effects */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.crt-overlay.scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg, 
+    rgba(255, 0, 0, 0.04), 
+    rgba(0, 255, 0, 0.01), 
+    rgba(0, 0, 255, 0.04)
+  );
+  background-size: 100% 4px, 6px 100%;
+}
+
+.crt-overlay.flicker {
+  animation: crt-flicker 0.15s infinite;
+  background: rgba(18, 16, 16, 0.02);
+}
+
+.crt-overlay.vignette {
+  background: radial-gradient(
+    circle, 
+    transparent 60%, 
+    rgba(0,0,0,0.85) 120%
+  );
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.985; }
+  50% { opacity: 1.0; }
+  100% { opacity: 0.985; }
+}
+
+/* Main canvas styling */
+#gameCanvas {
+  display: block;
+  max-width: 100%;
+  aspect-ratio: 3/2;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+/* Monitor bezel controls */
+.crt-bezel-bottom {
+  height: 38px;
+  background: #2d333b;
+  border-top: 1px solid #3c444d;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.brand-name {
+  color: #535c68;
+}
+
+.bezel-leds {
+  display: flex;
+  gap: 12px;
+}
+
+.led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2d3748;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s;
+}
+
+.led.power-led.active {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8, inset 0 1px 1px rgba(255,255,255,0.5);
+}
+
+.led.drive-led.active {
+  background: var(--color-404);
+  box-shadow: 0 0 8px var(--color-404), inset 0 1px 1px rgba(255,255,255,0.5);
+}
+
+/* ==========================================================================
+   Overlay Menus (Start, Game Over, BSOD)
+   ========================================================================== */
+.game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  background: rgba(5, 7, 10, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  padding: 30px;
+  text-align: center;
+  font-family: var(--font-ui);
+}
+
+.game-overlay.hidden {
+  display: none !important;
+}
+
+/* Glitch Headers */
+.glitch-header {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  position: relative;
+  color: var(--color-200);
+  text-shadow: 0 0 15px rgba(46, 160, 67, 0.4);
+  font-family: var(--font-ui);
+  margin-bottom: 8px;
+}
+
+.glitch-header.danger {
+  color: var(--color-404);
+  text-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+}
+
+.overlay-subtitle {
+  font-family: var(--font-code);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.start-instructions {
+  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid var(--border-color);
+  padding: 18px 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  max-width: 440px;
+}
+
+.instruction-line {
+  font-size: 13px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+  font-family: var(--font-ui);
+}
+
+/* Status Badges */
+.status-badge {
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-shadow: none;
+}
+.status-badge.s200 { background: rgba(46, 160, 67, 0.2); border: 1px solid var(--color-200); color: #85ea9b; }
+.status-badge.s404 { background: rgba(255, 0, 85, 0.2); border: 1px solid var(--color-404); color: #ffa8be; }
+.status-badge.s301 { background: rgba(0, 240, 255, 0.2); border: 1px solid var(--color-301); color: #8ffcff; }
+.status-badge.s403 { background: rgba(255, 51, 51, 0.2); border: 1px solid var(--color-403); color: #ffadad; }
+.status-badge.s500 { background: rgba(51, 119, 255, 0.2); border: 1px solid var(--color-500); color: #b8d4ff; }
+
+/* Buttons */
+.retro-btn {
+  background: transparent;
+  border: 2px solid var(--color-200);
+  box-shadow: 0 0 10px rgba(46, 160, 67, 0.2);
+  color: var(--color-200);
+  font-family: var(--font-code);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 12px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retro-btn:hover {
+  background: var(--color-200);
+  color: #000;
+  box-shadow: 0 0 20px rgba(46, 160, 67, 0.6);
+}
+
+.retro-btn.restart {
+  border-color: var(--color-404);
+  box-shadow: 0 0 10px rgba(255, 0, 85, 0.2);
+  color: var(--color-404);
+}
+
+.retro-btn.restart:hover {
+  background: var(--color-404);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.6);
+}
+
+/* Game Over Overlay Specifics */
+.error-code-output {
+  font-family: var(--font-code);
+  margin-bottom: 20px;
+}
+
+.err-title {
+  color: var(--color-404);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.err-details {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.score-summary-grid {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  width: 90%;
+  max-width: 440px;
+}
+
+.score-card {
+  flex: 1;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-card .label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-code);
+}
+
+.score-card .value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  font-family: var(--font-ui);
+}
+
+/* Blue Screen of Death overlay */
+.game-overlay.bsod-screen {
+  background: #0000aa; /* Classic Windows BSOD Blue */
+  font-family: 'Consolas', 'Lucida Console', var(--font-code);
+  align-items: flex-start;
+  text-align: left;
+  padding: 50px;
+}
+
+.bsod-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 24px;
+  font-family: var(--font-code);
+}
+
+.bsod-p {
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  max-width: 500px;
+  font-family: var(--font-code);
+}
+
+.bsod-progress {
+  width: 100%;
+  max-width: 500px;
+  height: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.bsod-bar {
+  height: 100%;
+  width: 0%;
+  background: #fff;
+  transition: width 0.1s linear;
+}
+
+/* Screen shake glitch class */
+.glitched-screen-shake {
+  animation: glitch-shake 0.3s infinite;
+}
+
+@keyframes glitch-shake {
+  0% { transform: translate(0, 0) skew(0deg); filter: hue-rotate(0deg); }
+  20% { transform: translate(-2px, 2px) skew(-1deg); filter: hue-rotate(90deg); }
+  40% { transform: translate(2px, -1px) skew(1deg); filter: hue-rotate(180deg); }
+  60% { transform: translate(-1px, -2px) skew(0.5deg); filter: hue-rotate(270deg); }
+  80% { transform: translate(2px, 1px) skew(-0.5deg); }
+  100% { transform: translate(0, 0) skew(0deg); }
+}
+
+/* ==========================================================================
+   Developer Tools (Right Column Sidebar)
+   ========================================================================== */
+.devtools-sidebar {
+  width: 380px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.devtools-header {
+  height: 38px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  padding: 0 8px;
+}
+
+.dev-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 100%;
+}
+
+.dev-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.dev-tab-btn.active {
+  color: var(--color-301);
+  border-bottom-color: var(--color-301);
+  font-weight: 600;
+}
+
+.devtools-content {
+  flex-grow: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.dev-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  flex-direction: column;
+}
+
+.dev-panel.active {
+  display: flex;
+}
+
+/* Developer Console Panel */
+.console-log-header {
+  height: 32px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-dark);
+}
+
+.console-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+
+.console-clear:hover {
+  color: var(--text-main);
+}
+
+.console-logs-list {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-family: var(--font-code);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-darker);
+}
+
+.console-log-item {
+  line-height: 1.4;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding-bottom: 4px;
+}
+
+.console-log-item.log-200 { color: #85ea9b; }
+.console-log-item.log-404 { color: #ffa8be; }
+.console-log-item.log-301 { color: #8ffcff; }
+.console-log-item.log-403 { color: #ffadad; }
+.console-log-item.log-500 { color: #b8d4ff; }
+.console-log-item.log-system { color: var(--text-muted); }
+
+.console-input-line {
+  height: 36px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  background: var(--bg-panel);
+}
+
+.console-input-line .prompt {
+  color: var(--color-301);
+  font-family: var(--font-code);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#console-cmd-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-family: var(--font-code);
+  font-size: 13px;
+}
+
+/* Developer Network Panel */
+.network-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  text-align: left;
+}
+
+.network-table th {
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.network-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-code);
+}
+
+.network-table tr:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.net-status {
+  font-weight: bold;
+}
+.net-status.s200 { color: var(--color-200); }
+.net-status.s404 { color: var(--color-404); }
+.net-status.s301 { color: var(--color-301); }
+.net-status.s403 { color: var(--color-403); }
+.net-status.s500 { color: var(--color-500); }
+
+/* Developer Performance Panel */
+.dev-panel#dev-performance {
+  padding: 16px;
+  gap: 16px;
+  overflow-y: auto;
+  background: var(--bg-darker);
+}
+
+.perf-stat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perf-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}
+
+.perf-stat-value {
+  font-family: var(--font-code);
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.perf-stat-value .unit {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.perf-stat-bar-container {
+  height: 4px;
+  width: 100%;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.perf-stat-bar {
+  height: 100%;
+  background: var(--color-200);
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s;
+}
+
+/* Devtools Bottom Status Bar */
+.devtools-status-bar {
+  height: 24px;
+  background: var(--bg-dark);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.devtools-status-bar .right-align {
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   Help About Modal Overlay
+   ========================================================================== */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 500px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: modal-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  height: 48px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.modal-body h4 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: var(--color-301);
+}
+
+.modal-body p {
+  margin-bottom: 16px;
+}
+
+.modal-body ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-body li {
+  padding-left: 12px;
+  border-left: 3px solid var(--border-color);
+}
+
+/* ==========================================================================
+   Responsive Adaptation for Small Screen Alerts
+   ========================================================================== */
+@media (max-width: 850px) {
+  #browser-container {
+    height: 98vh;
+    width: 98vw;
+  }
+  .devtools-sidebar {
+    display: none; /* Hide devtools on smaller screens to maximize play area */
+  }
+}
