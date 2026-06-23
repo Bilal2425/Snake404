@@ -983,3 +983,138 @@ kbd {
     display: none; /* Hide devtools on smaller screens to maximize play area */
   }
 }
+
+/* ==========================================================================
+   Bookmarks Bar & Levels / Power-up Additions
+   ========================================================================== */
+.bookmarks-bar {
+  height: 32px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.bookmarks-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-code);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bookmark-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bookmark-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+.bookmark-btn.active {
+  background: var(--bg-active);
+  color: var(--color-301);
+  border-color: var(--border-color);
+  text-shadow: 0 0 4px rgba(0, 240, 255, 0.25);
+}
+
+/* Custom Status Badges */
+.status-badge.s-https { background: rgba(255, 192, 0, 0.2); border: 1px solid var(--color-yellow); color: #ffe494; }
+.status-badge.s-gzip { background: rgba(51, 119, 255, 0.2); border: 1px solid var(--color-500); color: #b8d4ff; }
+.status-badge.s-cache { background: rgba(0, 240, 255, 0.2); border: 1px solid var(--color-301); color: #8ffcff; }
+
+.console-log-item.log-gzip { color: #58a6ff; }
+.console-log-item.log-https { color: #ffca28; }
+.console-log-item.log-cache { color: #00e5ff; }
+.console-log-item.log-hacker { color: #d500f9; font-weight: bold; }
+.console-log-item.log-level { color: #00e676; font-weight: bold; text-shadow: 0 0 5px rgba(0, 230, 118, 0.3); }
+
+.net-status.sGZIP { color: #58a6ff; }
+.net-status.sHTTPS { color: #ffca28; }
+.net-status.sCACHE { color: #00e5ff; }
+.net-status.sDEAUTH { color: #d500f9; }
+.net-status.sDEPLOY { color: #00e676; }
+
+/* Locked Bookmark Buttons styling */
+.bookmark-btn.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: rgba(255,255,255,0.02);
+  color: var(--text-muted);
+}
+.bookmark-btn.locked:hover {
+  background: rgba(255, 51, 51, 0.05);
+  color: var(--color-403);
+  border-color: rgba(255, 51, 51, 0.15);
+}
+
+/* Nav Bar Level Up Progress Bar */
+.level-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.progress-label {
+  font-size: 9px;
+  font-family: var(--font-code);
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.progress-bar-bg {
+  width: 90px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--color-200);
+  box-shadow: 0 0 6px var(--color-200);
+  font-size: 8px;
+  font-family: var(--font-code);
+  font-weight: bold;
+  text-align: center;
+  line-height: 8px;
+  color: #000;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
+}
+
+/* Deploying overlay stdout lines */
+.deploy-progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-family: var(--font-code);
+}
+

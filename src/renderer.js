@@ -89,16 +89,34 @@ export class Renderer {
     // 3. Draw Firewalls (403 Forbidden obstacles)
     this.drawFirewalls(game.firewalls);
 
+    // Draw Hacker Lasers
+    this.drawHackerLasers(game.hackerLasers, game.hackerLasersActive);
+
     // 4. Draw Status Packets (Food)
     this.drawPackets(game.packets);
 
-    // 5. Draw Snake Data Stream
-    this.drawSnake(game.snake, game.direction, game.glitchActive);
+    // 5. Draw Malware Bug (wandering hazard)
+    if (game.malwareBug) {
+      this.drawMalwareBug(game.malwareBug);
+    }
 
-    // 6. Draw explosions & update particles
+    // Draw Hacker EMP trap walls (temporary)
+    if (game.hackerEmpWalls && game.hackerEmpWalls.length > 0) {
+      this.drawHackerEmpWalls(game.hackerEmpWalls);
+    }
+
+    // Draw Hacker Node
+    if (game.hackerNode) {
+      this.drawHackerNode(game.hackerNode, game.hackerTelegraphTicks, game.hackerSprintTicks);
+    }
+
+    // 6. Draw Snake Data Stream (supports SSL Shield aura)
+    this.drawSnake(game.snake, game.direction, game.glitchActive, game.shieldActive);
+
+    // 7. Draw explosions & update particles
     this.drawAndUpdateParticles();
     
-    // 7. Draw custom debug indicators on canvas (if god mode active)
+    // 8. Draw custom debug indicators on canvas (if god mode active)
     if (game.godMode) {
       this.ctx.fillStyle = 'rgba(46, 160, 67, 0.8)';
       this.ctx.font = '10px "Fira Code", monospace';
@@ -276,6 +294,71 @@ export class Renderer {
           this.ctx.arc(0, r/2, 2, 0, Math.PI * 2);
           this.ctx.fill();
           break;
+          
+        case PACKET_TYPES.GZIP:
+          // Blue file box arpeggio
+          this.ctx.shadowBlur = 12;
+          this.ctx.shadowColor = '#3377ff';
+          this.ctx.fillStyle = '#3377ff';
+          this.ctx.strokeStyle = '#fff';
+          this.ctx.lineWidth = 1;
+          
+          this.ctx.beginPath();
+          this.ctx.rect(-r + 1, -r + 1, r*2 - 2, r*2 - 2);
+          this.ctx.fill();
+          this.ctx.stroke();
+          
+          // Draw text inside
+          this.ctx.shadowBlur = 0;
+          this.ctx.fillStyle = '#fff';
+          this.ctx.font = 'bold 7px "Fira Code", monospace';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText("ZIP", 0, 0);
+          break;
+          
+        case PACKET_TYPES.HTTPS:
+          // Yellow shield badge
+          this.ctx.shadowBlur = 12;
+          this.ctx.shadowColor = '#ffc000';
+          this.ctx.fillStyle = '#ffc000';
+          
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, -r);
+          this.ctx.lineTo(r, -r + 4);
+          this.ctx.lineTo(r - 2, 2);
+          this.ctx.lineTo(0, r);
+          this.ctx.lineTo(-r + 2, 2);
+          this.ctx.lineTo(-r, -r + 4);
+          this.ctx.closePath();
+          this.ctx.fill();
+          
+          // Inner detail
+          this.ctx.fillStyle = '#000';
+          this.ctx.font = 'bold 8px monospace';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText("S", 0, 0);
+          break;
+          
+        case PACKET_TYPES.CACHE_CONTROL:
+          // Cyan clock/hourglass
+          this.ctx.shadowBlur = 12;
+          this.ctx.shadowColor = '#00f0ff';
+          this.ctx.fillStyle = '#00f0ff';
+          
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+          this.ctx.fill();
+          
+          // Draw hourglass lines inside
+          this.ctx.strokeStyle = '#000';
+          this.ctx.lineWidth = 1.5;
+          this.ctx.beginPath();
+          this.ctx.moveTo(-3, -3); this.ctx.lineTo(3, 3);
+          this.ctx.moveTo(3, -3); this.ctx.lineTo(-3, 3);
+          this.ctx.stroke();
+          break;
       }
       
       this.ctx.restore();
@@ -284,9 +367,47 @@ export class Renderer {
   }
 
   /**
+   * Draw the slowly wandering Malware Bug hazard
+   */
+  drawMalwareBug(bug) {
+    const x = bug.x * this.cellSize;
+    const y = bug.y * this.cellSize;
+    const size = this.cellSize;
+    
+    this.ctx.save();
+    
+    // Glowing red hazard
+    this.ctx.shadowBlur = 10;
+    this.ctx.shadowColor = '#ff3333';
+    this.ctx.fillStyle = '#ff3333';
+    
+    // Draw bug body (rounded core)
+    this.drawRoundedRect(x + 4, y + 4, size - 8, size - 8, 3);
+    
+    // Draw little legs (6 short lines)
+    this.ctx.strokeStyle = '#ff3333';
+    this.ctx.lineWidth = 1.5;
+    this.ctx.beginPath();
+    // Left legs
+    this.ctx.moveTo(x + 4, y + 6); this.ctx.lineTo(x + 1, y + 4);
+    this.ctx.moveTo(x + 4, y + 10); this.ctx.lineTo(x + 1, y + 10);
+    this.ctx.moveTo(x + 4, y + 14); this.ctx.lineTo(x + 1, y + 16);
+    // Right legs
+    this.ctx.moveTo(x + size - 4, y + 6); this.ctx.lineTo(x + size - 1, y + 4);
+    this.ctx.moveTo(x + size - 4, y + 10); this.ctx.lineTo(x + size - 1, y + 10);
+    this.ctx.moveTo(x + size - 4, y + 14); this.ctx.lineTo(x + size - 1, y + 16);
+    // Antenna
+    this.ctx.moveTo(x + 8, y + 4); this.ctx.lineTo(x + 6, y + 1);
+    this.ctx.moveTo(x + 12, y + 4); this.ctx.lineTo(x + 14, y + 1);
+    this.ctx.stroke();
+    
+    this.ctx.restore();
+  }
+
+  /**
    * Draw the Snake Data Stream (supports glitch styling)
    */
-  drawSnake(snake, direction, isGlitched) {
+  drawSnake(snake, direction, isGlitched, shieldActive) {
     if (snake.length === 0) return;
 
     // 1. Draw body segment path
@@ -301,6 +422,19 @@ export class Renderer {
       this.ctx.save();
       
       if (isHead) {
+        // Draw head shield aura if HTTPS is active
+        if (shieldActive) {
+          this.ctx.save();
+          this.ctx.shadowBlur = 16;
+          this.ctx.shadowColor = '#ffc000';
+          this.ctx.strokeStyle = 'rgba(255, 192, 0, 0.8)';
+          this.ctx.lineWidth = 2.5;
+          this.ctx.beginPath();
+          this.ctx.arc(x + size / 2, y + size / 2, size - 1, 0, Math.PI * 2);
+          this.ctx.stroke();
+          this.ctx.restore();
+        }
+
         // Snake Head - Glowing Node
         this.ctx.shadowBlur = 14;
         this.ctx.shadowColor = isGlitched ? '#ff0055' : '#00f0ff'; // cyan or glitch magenta
@@ -425,5 +559,101 @@ export class Renderer {
       
       this.ctx.restore();
     }
+  }
+
+  /**
+   * Draw the Hacker Boss Node
+   */
+  drawHackerNode(hacker, telegraphTicks = 0, sprintTicks = 0) {
+    const x = hacker.x * this.cellSize;
+    const y = hacker.y * this.cellSize;
+    const size = this.cellSize;
+    const t = Date.now();
+
+    this.ctx.save();
+
+    let nodeColor = '#d500f9'; // default purple
+    let glowColor = '#d500f9';
+    let glowBlur = 15;
+
+    if (telegraphTicks > 0) {
+      // TELEGRAPH: rapid red-white flash warning
+      const flash = Math.floor(t / 80) % 2 === 0;
+      nodeColor = flash ? '#ff1744' : '#ffffff';
+      glowColor = '#ff1744';
+      glowBlur = 25;
+    } else if (sprintTicks > 0) {
+      // SPRINT: bright electric cyan surge
+      nodeColor = '#00e5ff';
+      glowColor = '#00e5ff';
+      glowBlur = 30;
+    }
+
+    this.ctx.shadowBlur = glowBlur;
+    this.ctx.shadowColor = glowColor;
+    this.ctx.fillStyle = nodeColor;
+    
+    this.drawRoundedRect(x + 2, y + 2, size - 4, size - 4, 5);
+    
+    this.ctx.shadowBlur = 0;
+    this.ctx.fillStyle = '#fff';
+    this.ctx.font = 'bold 12px "Fira Code", monospace';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    // Show different icon per state
+    const icon = telegraphTicks > 0 ? '⚡' : sprintTicks > 0 ? '▶' : '☠';
+    this.ctx.fillText(icon, x + size / 2, y + size / 2);
+    
+    this.ctx.restore();
+  }
+
+  /**
+   * Draw temporary EMP firewall traps (yellow pulsing squares)
+   */
+  drawHackerEmpWalls(empWalls) {
+    this.ctx.save();
+    const alpha = 0.4 + Math.sin(Date.now() / 120) * 0.25;
+    this.ctx.strokeStyle = `rgba(255, 214, 0, ${alpha})`;
+    this.ctx.fillStyle = `rgba(255, 180, 0, ${alpha * 0.5})`;
+    this.ctx.shadowBlur = 10;
+    this.ctx.shadowColor = '#ffd600';
+    this.ctx.lineWidth = 2;
+
+    empWalls.forEach(w => {
+      const wx = w.x * this.cellSize;
+      const wy = w.y * this.cellSize;
+      this.ctx.fillRect(wx + 2, wy + 2, this.cellSize - 4, this.cellSize - 4);
+      this.ctx.strokeRect(wx + 2, wy + 2, this.cellSize - 4, this.cellSize - 4);
+    });
+    this.ctx.restore();
+  }
+
+  /**
+   * Draw Hacker Scanning Lasers
+   */
+  drawHackerLasers(lasers, activeTicks) {
+    if (!lasers || lasers.length === 0) return;
+    
+    this.ctx.save();
+    const alpha = 0.35 + Math.sin(Date.now() / 40) * 0.15;
+    this.ctx.fillStyle = `rgba(255, 0, 85, ${alpha})`;
+    
+    lasers.forEach(cell => {
+      const lx = cell.x * this.cellSize;
+      const ly = cell.y * this.cellSize;
+      this.ctx.fillRect(lx, ly, this.cellSize, this.cellSize);
+      
+      // Core laser beam line
+      this.ctx.strokeStyle = '#fff';
+      this.ctx.lineWidth = 1.5;
+      this.ctx.beginPath();
+      this.ctx.moveTo(lx + this.cellSize / 2, ly);
+      this.ctx.lineTo(lx + this.cellSize / 2, ly + this.cellSize);
+      this.ctx.moveTo(lx, ly + this.cellSize / 2);
+      this.ctx.lineTo(lx + this.cellSize, ly + this.cellSize / 2);
+      this.ctx.stroke();
+    });
+    
+    this.ctx.restore();
   }
 }

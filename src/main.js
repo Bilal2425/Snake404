@@ -12,6 +12,11 @@ const startOverlay = document.getElementById('overlay-start');
 const gameOverOverlay = document.getElementById('overlay-gameover');
 const bsodOverlay = document.getElementById('overlay-bsod');
 const screenGlitchWrapper = document.getElementById('screen-glitch-wrapper');
+const deployOverlay = document.getElementById('overlay-deploy');
+const deployProgressBar = document.getElementById('deploy-progress-bar');
+const deployLogStdout = document.getElementById('deploy-log-stdout');
+const progressFill = document.getElementById('level-progress-fill');
+const progressContainer = document.getElementById('level-progress-container');
 
 const startBtn = document.getElementById('start-game-btn');
 const restartBtn = document.getElementById('restart-game-btn');
@@ -65,6 +70,9 @@ function init() {
   setupEventListeners();
   setupGameCallbacks();
   
+  // Sync the locks and server bookmark states
+  syncBookmarkUI();
+  
   // Draw initial canvas frame (background animation)
   renderBackgroundOnly();
   
@@ -111,17 +119,17 @@ function setupEventListeners() {
   // Game state button clicks
   startBtn.addEventListener('click', () => {
     audio.init();
-    audio.playClick();
+    audio.playBoot();
     game.start();
   });
 
   restartBtn.addEventListener('click', () => {
-    audio.playClick();
+    audio.playBoot();
     game.start();
   });
 
   navRefreshBtn.addEventListener('click', () => {
-    audio.playClick();
+    audio.playBoot();
     if (game.gameState === 'playing' || game.gameState === 'gameover') {
       addConsoleLog("Connection reset requested by client...", "log-system");
       game.start();
@@ -213,6 +221,34 @@ function setupEventListeners() {
       aboutModal.classList.add('hidden');
     }
   });
+
+  // Bookmark button clicks (Server environment switching)
+  const bookmarkBtns = document.querySelectorAll('.bookmark-btn');
+  bookmarkBtns.forEach(btn => {
+    // Enable clicks for locked feedback
+    btn.removeAttribute('disabled');
+    
+    btn.addEventListener('click', () => {
+      audio.init(); // Ensure audio is initialized on click before playing
+      
+      if (btn.classList.contains('locked')) {
+        audio.play403();
+        addConsoleLog(`[ACCESS DENIED] Build uncompiled. Complete previous server environment first.`, "log-403");
+        return;
+      }
+      
+      audio.playClick();
+      bookmarkBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const levelId = btn.id.split('-')[1]; // localhost, staging, production
+      game.currentLevel = levelId;
+      addConsoleLog(`[SYSTEM] Client redirecting to environment: ${levelId.toUpperCase()}`, "log-system");
+      
+      // Auto-restart game with new level settings
+      game.start();
+    });
+  });
 }
 
 /**
@@ -221,6 +257,15 @@ function setupEventListeners() {
 function setupGameCallbacks() {
   game.onLog = (msg, type) => {
     addConsoleLog(msg, type);
+  };
+
+  game.onShieldBreak = () => {
+    audio.playShieldBreak();
+  };
+
+  game.onHackerDefeated = (x, y) => {
+    renderer.spawnExplosion(x, y, '#d500f9');
+    audio.playHackerDeauth();
   };
 
   game.onNetworkRequest = (status, name, type, size, latency) => {
@@ -232,9 +277,12 @@ function setupGameCallbacks() {
     
     // Trigger relative audio
     if (status === 200) audio.play200();
-    else if (status === 404) audio.play440 || audio.play404();
+    else if (status === 404) audio.play404();
     else if (status === 301) audio.play301();
     else if (status === 500) audio.play500();
+    else if (status === "GZIP") audio.playGzip();
+    else if (status === "HTTPS") audio.playHttps();
+    else if (status === "CACHE") audio.playCache();
   };
 
   game.onStateChange = (state) => {
@@ -244,6 +292,7 @@ function setupGameCallbacks() {
     startOverlay.classList.add('hidden');
     gameOverOverlay.classList.add('hidden');
     bsodOverlay.classList.add('hidden');
+    deployOverlay.classList.add('hidden');
 
     if (state === 'menu') {
       startOverlay.classList.remove('hidden');
@@ -262,6 +311,60 @@ function setupGameCallbacks() {
     } else if (state === 'bsod') {
       audio.play500();
       triggerBsodCrashSequence();
+    } else if (state === 'deploying') {
+      audio.playDeploy();
+      deployOverlay.classList.remove('hidden');
+      
+      let progress = 0;
+      deployProgressBar.style.width = '0%';
+      
+      const logs = [
+        "> Initiating build optimization...",
+        "> Compiling JS assets...",
+        "> Compiling style.css stylesheets...",
+        "> Bundling package files...",
+        "> Uploading compiled assets to repository...",
+        "> Re-routing DNS to next environment...",
+        "> Deployment successful! Redirecting..."
+      ];
+      
+      deployLogStdout.textContent = logs[0];
+      
+      const interval = setInterval(() => {
+        progress += 4;
+        deployProgressBar.style.width = `${progress}%`;
+        
+        const logIndex = Math.min(logs.length - 1, Math.floor((progress / 100) * logs.length));
+        deployLogStdout.textContent = logs[logIndex];
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          
+          setTimeout(() => {
+            let nextLevel = 'staging';
+            if (game.currentLevel === 'localhost') {
+              nextLevel = 'staging';
+            } else if (game.currentLevel === 'staging') {
+              nextLevel = 'production';
+            }
+            
+            // Unlock next level
+            if (!game.unlockedLevels.includes(nextLevel)) {
+              game.unlockedLevels.push(nextLevel);
+              addConsoleLog(`[UNLOCKED] Server environment [${nextLevel.toUpperCase()}] compiled and unlocked!`, "log-level");
+            }
+            
+            // Switch environment and restart game
+            game.currentLevel = nextLevel;
+            
+            // Sync UI (bookmark styling now shows the new level as active)
+            syncBookmarkUI();
+            
+            deployOverlay.classList.add('hidden');
+            game.start();
+          }, 600);
+        }
+      }, 100);
     }
   };
 
@@ -295,8 +398,9 @@ function startGameLoop() {
     renderer.draw(game);
     updatePerformanceDisplay();
 
-    // Recurse based on current game speed
-    gameLoopTimeout = setTimeout(tick, game.currentSpeed);
+    // Recurse based on current game speed (slowing down if Cache-Control active)
+    const tickSpeed = game.slowMoActive ? Math.round(game.currentSpeed * 1.7) : game.currentSpeed;
+    gameLoopTimeout = setTimeout(tick, tickSpeed);
   }
 
   tick();
@@ -396,27 +500,79 @@ function addNetworkRow(status, name, type, size, latency) {
 }
 
 /**
+ * Sync bookmarks visual state (locks vs custom server icons)
+ */
+function syncBookmarkUI() {
+  const bookmarkBtns = document.querySelectorAll('.bookmark-btn');
+  bookmarkBtns.forEach(btn => {
+    const levelId = btn.id.split('-')[1];
+    if (game.unlockedLevels.includes(levelId)) {
+      btn.classList.remove('locked');
+      if (levelId === 'staging') {
+        btn.textContent = "🧪 http://staging.local/";
+        btn.title = "Switch to Staging";
+      } else if (levelId === 'production') {
+        btn.textContent = "🚀 http://production.live/";
+        btn.title = "Switch to Production";
+      }
+    } else {
+      btn.classList.add('locked');
+      if (levelId === 'staging') {
+        btn.textContent = "🔒 http://staging.local/";
+        btn.title = "Staging Server (Locked)";
+      } else if (levelId === 'production') {
+        btn.textContent = "🔒 http://production.live/";
+        btn.title = "Production Server (Locked)";
+      }
+    }
+    
+    if (game.currentLevel === levelId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+/**
  * Dynamically adjust browser address bar text
  */
 function updateAddressBar(state) {
-  const urls = {
-    'menu': 'https://snake404.local/welcome.html',
-    'playing': 'https://snake404.local/index.html?status=200_ok',
-    'gameover': 'https://snake404.local/connection_reset.html?err=COLLISION',
-    'bsod': 'https://snake404.local/500_internal_server_error.html'
-  };
-
-  let url = urls[state] || 'https://snake404.local/';
-  if (state === 'playing' && game.glitchActive) {
-    url = 'https://snake404.local/index.html?glitch=active&404_triggered';
+  if (state === 'menu') {
+    addressInput.value = 'https://snake404.local/welcome.html';
+    return;
   }
-  addressInput.value = url;
+  if (state === 'bsod') {
+    addressInput.value = 'https://snake404.local/500_server_error.html';
+    return;
+  }
+  
+  let base = 'http://localhost/';
+  if (game.currentLevel === 'staging') base = 'http://staging.local/';
+  else if (game.currentLevel === 'production') base = 'http://production.live/';
+  
+  let suffix = 'index.html';
+  if (state === 'gameover') suffix = 'connection_reset.html';
+  else if (game.glitchActive) suffix = 'index.html?glitch=active';
+  else if (game.slowMoActive) suffix = 'index.html?cache=throttled';
+  
+  addressInput.value = base + suffix;
 }
 
 /**
  * Keep performance metrics updated
  */
 function updatePerformanceDisplay() {
+  // Update Level compile progress bar
+  if (game.currentLevel === 'production') {
+    progressContainer.style.display = 'none';
+  } else {
+    progressContainer.style.display = 'flex';
+    const percent = Math.min(100, Math.floor((game.levelProgressCount / game.levelGoal) * 100));
+    progressFill.style.width = `${percent}%`;
+    progressFill.textContent = `${percent}%`;
+  }
+
   // Update FPS text & bar
   perfFps.textContent = currentFps.toFixed(1);
   const fpsPct = Math.min(100, (currentFps / 60) * 100);
@@ -437,15 +593,24 @@ function updatePerformanceDisplay() {
   }
 
   // Update speed values
-  perfSpeed.textContent = `${game.currentSpeed}ms/tick`;
+  const speedText = game.slowMoActive ? `${Math.round(game.currentSpeed * 1.7)}ms (Throttled)` : `${game.currentSpeed}ms/tick`;
+  perfSpeed.textContent = speedText;
+  perfSpeed.style.color = game.slowMoActive ? '#00e5ff' : '#fff';
   
   // Update multipliers
-  const mult = game.glitchActive ? '2.5x' : '1.0x';
-  perfMultiplier.textContent = mult;
-  perfMultiplier.style.color = game.glitchActive ? '#ff0055' : '#fff';
+  let multVal = 1.0;
+  if (game.glitchActive) multVal *= 2.5;
+  if (game.slowMoActive) multVal *= 0.5;
+  perfMultiplier.textContent = `${multVal.toFixed(1)}x`;
+  
+  if (game.glitchActive) perfMultiplier.style.color = '#ff0055';
+  else if (game.slowMoActive) perfMultiplier.style.color = '#00e5ff';
+  else perfMultiplier.style.color = '#fff';
 
   // Update active packets count
-  perfPackets.textContent = game.packets.length + game.firewalls.length;
+  let nodesCount = game.packets.length + game.firewalls.length;
+  if (game.malwareBug) nodesCount++;
+  perfPackets.textContent = nodesCount;
 
   // Update memory (random slow increase/decrease to simulate garbage collection)
   const baseMem = 4.02 + (game.snake.length * 0.05);

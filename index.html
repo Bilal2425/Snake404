@@ -45,10 +45,24 @@
           <span class="address-security-lock">🔒</span>
           <input type="text" id="browser-address-input" value="https://snake404.local/index.html" readonly />
         </div>
+        <div class="level-progress-wrapper" id="level-progress-container">
+          <span class="progress-label" id="progress-bar-label">COMPILE PROGRESS:</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="level-progress-fill" style="width: 0%;">0%</div>
+          </div>
+        </div>
         <div class="network-latency-display">
           <span class="ping-indicator"></span>
           <span id="ping-text">PING: 24ms</span>
         </div>
+      </div>
+
+      <!-- Bookmarks / Server Selector Bar -->
+      <div class="bookmarks-bar">
+        <span class="bookmarks-label">Bookmarks:</span>
+        <button id="bookmark-localhost" class="bookmark-btn active" title="Switch to Localhost">💻 http://localhost/</button>
+        <button id="bookmark-staging" class="bookmark-btn locked" title="Staging Server (Locked)" disabled>🔒 http://staging.local/</button>
+        <button id="bookmark-production" class="bookmark-btn locked" title="Production Server (Locked)" disabled>🔒 http://production.live/</button>
       </div>
 
       <!-- Main Browser Window Workspace -->
@@ -74,10 +88,11 @@
                 <div class="glitch-header" data-text="SNAKE 404">SNAKE 404</div>
                 <p class="overlay-subtitle">HTTP STATUS CODE SURVIVAL SIMULATOR</p>
                 <div class="start-instructions">
-                  <div class="instruction-line"><kbd>&uarr;&darr;&larr;&rarr;</kbd> or <kbd>WASD</kbd> to steer data stream</div>
-                  <div class="instruction-line">Eat <span class="status-badge s200">200 OK</span> to compile code and grow</div>
-                  <div class="instruction-line">Avoid <span class="status-badge s403">403 FORBIDDEN</span> firewall nodes</div>
-                  <div class="instruction-line">Brace for <span class="status-badge s404">404 NOT FOUND</span> coordinate shifts</div>
+                  <div class="instruction-line"><kbd>&uarr;&darr;&larr;&rarr;</kbd> / <kbd>WASD</kbd> to steer data stream</div>
+                  <div class="instruction-line">Eat <span class="status-badge s200">200 OK</span> to grow. Avoid <span class="status-badge s403">403 Firewall</span> & Malware bugs</div>
+                  <div class="instruction-line">🛡️ <span class="status-badge s-https">HTTPS</span> (SSL Shield) protects you from one crash</div>
+                  <div class="instruction-line">🗜️ <span class="status-badge s-gzip">gzip</span> shrinks tail. ⏳ <span class="status-badge s-cache">Cache-Control</span> slows down time</div>
+                  <div class="instruction-line">Choose server level above: 💻 Local | 🧪 Staging | 🚀 Prod</div>
                 </div>
                 <button id="start-game-btn" class="retro-btn">INITIALIZE SYSTEM</button>
               </div>
@@ -109,6 +124,18 @@
                 <p class="bsod-p">Please hold while segments are defragmented and packet streams are rescaled...</p>
                 <div class="bsod-progress">
                   <div class="bsod-bar" id="bsod-progress-bar"></div>
+                </div>
+              </div>
+
+              <!-- 4. Level Up / Deploy Overlay -->
+              <div id="overlay-deploy" class="game-overlay hidden">
+                <div class="glitch-header" data-text="DEPLOYING BUILD...">DEPLOYING BUILD...</div>
+                <p class="overlay-subtitle" id="deploy-overlay-title">ENVIRONMENT SYNC IN PROGRESS</p>
+                <div class="deploy-progress-container">
+                  <p class="console-text" id="deploy-log-stdout" style="font-family: var(--font-code); font-size: 12px; color: var(--color-301); margin-bottom: 12px; height: 18px;">> Uploading compiled assets to repository...</p>
+                  <div class="bsod-progress" style="width: 280px; margin: 0 auto;">
+                    <div class="bsod-bar" id="deploy-progress-bar" style="width: 0%; background: var(--color-301); box-shadow: 0 0 8px var(--color-301);"></div>
+                  </div>
                 </div>
               </div>
 
@@ -217,13 +244,22 @@
         </div>
         <div class="modal-body">
           <h4>📥 Network Packets Legend</h4>
-          <p>Guide to incoming data packets on the network stream:</p>
           <ul>
-            <li><strong>🟢 200 OK (Standard):</strong> The core code packet. Increases your score by 10 points, expands your file buffer (length), and feeds the stream.</li>
-            <li><strong>⚡ 404 Not Found (Anomaly):</strong> The glitched file. Multiplies your current score, but triggers visual noise, screen distortion, and inverts controls for 5 seconds. High risk, high reward!</li>
-            <li><strong>🌀 301 Redirect (Wormhole):</strong> A redirection packet. Instantly moves the snake's head to a random portal elsewhere in the grid. Keeps length unchanged.</li>
-            <li><strong>🚫 403 Forbidden (Firewall):</strong> Blocked node. Spawns wall blocks dynamically. Crashing into one triggers an immediate termination (Game Over).</li>
-            <li><strong>🔵 500 Server Error (Crash):</strong> Fatal server anomaly. Triggers a full system crash overlay (Blue Screen of Death) for 2 seconds. The server automatically recovers, shrinking the snake's length by 3 segments and resetting current speed modifiers.</li>
+            <li><strong>🟢 200 OK:</strong> Core data packet. Grows tail and increases speed.</li>
+            <li><strong>⚡ 404 Not Found:</strong> Anomaly. Inverts controls and shakes screen for 5 seconds, but boosts score.</li>
+            <li><strong>🌀 301 Redirect:</strong> Redirection. Teleports snake head to a random cell.</li>
+            <li><strong>🔵 500 Server Error:</strong> Severe crash. Triggers a Blue Screen of Death, shrinking tail by 3 segments and resetting speed.</li>
+            <li><strong>🚫 403 Forbidden (Firewall):</strong> Impassable red hazard nodes. Colliding triggers Game Over.</li>
+          </ul>
+          <h4 style="margin-top: 16px;">🛡️ HTTP Power-up Packets</h4>
+          <ul>
+            <li><strong>💛 HTTPS (SSL Shield):</strong> Grants a protective aura that absorbs 1 collision (self or firewall).</li>
+            <li><strong>💙 gzip (Decompress):</strong> Compresses your snake buffer, cutting tail length by 3 segments.</li>
+            <li><strong>🩵 Cache-Control (Slow-Mo):</strong> Slows down the speed of game ticks temporarily.</li>
+          </ul>
+          <h4 style="margin-top: 16px;">👾 Malware Bug (Hazard)</h4>
+          <ul>
+            <li><strong>🔴 Malware Bug:</strong> A wandering red block that crawls on Staging and Production levels. Touching it crashes the server.</li>
           </ul>
         </div>
       </div>
